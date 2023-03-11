@@ -1,11 +1,17 @@
-from torchvision import datasets, transforms
-from base import BaseDataLoader
+from torch.utils.data import Dataset
+import datasets, os
 
-class IWSLT_DataGen(torch.utils.data.Dataset):
 
-    def __init__(self, cache_dir: str, config_id: int=15, verbose: bool=True,
-                 data_split: str='train'):
-        
+class DataGen(Dataset):
+
+    def __init__(self, 
+                 config_id:int,                 # which config id (language mapping) to be used
+                 verbose:bool=True,             # verbose logging
+                 data_split:str='train',         # data split [train, test, val]
+                 cache_dir:str='../dataset',    # path to where the data will be saved
+                ):
+    
+
         # Dataset language maps
         self.config_name = [
             'iwslt2017-en-it', 'iwslt2017-en-nl', 'iwslt2017-en-ro', 
@@ -28,6 +34,10 @@ class IWSLT_DataGen(torch.utils.data.Dataset):
         self.config = self.config_name[config_id]
         # Language splits: ['train', 'test', 'validation']
         self.data_split = data_split
+
+        # create filepath
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
 
         self.dataset = datasets.load_dataset("iwslt2017", 
                                              self.config,
@@ -60,5 +70,5 @@ class IWSLT_DataGen(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-
-    dataset = IWSLT_DataGen(cache_dir='../datasets/')
+    data = DataGen(config_id=15, verbose=True)
+    print(data[0])
