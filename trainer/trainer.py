@@ -2,7 +2,8 @@ from torch.nn import Module
 from torch.utils.data import DataLoader
 import torch, time
 import numpy as np
-import pickle, os
+import pickle, os, sys
+from typing import Optional, List
 
 class Trainer:
 
@@ -19,6 +20,8 @@ class Trainer:
                  mode:str='min',                        # which quantity is the best: minimum or maximum
                  checkpoint_freq=0,                     # checkpoint epoch duration
                  filepath='./',                         # where to save the checkpoint and weight
+                 callbacks=Optional[List],              # functions to call on epoch end
+                 early_stop=Optional[int],              # stop model when it is not updated
                 ):
         
 
@@ -38,18 +41,26 @@ class Trainer:
         self.filepath               = filepath
         self.mode                   = min if mode == 'min' else max
         self.metric_best            = +np.inf if mode=='min' else -np.inf
-        self.metric_best_epoch      = None
-
+        self.metric_best_epoch      = 0
+        self.last_checkpoint_epoch  = 0
+        self.callbacks              = callbacks
+        self.early_stop             = early_stop
 
         
     def preprocess(self):
         self.epoch_idx = 1
         self.logs = {'epoch': []}
-        self.model = self.model.to(self.device)
+
+        if self.prev_checkpoint != '':
+            self.load_checkpoint(self.prev_checkpoint)
 
 
     def save_best(self):
         ''' Checks if best metric is found, if so, best weigth is saved'''
+
+        self.metric_best = self.mode(self.logs[self.monitor][-1], self.metric_best)
+        if self.metric_best == self.mode(self.logs[self.monitor][-1], self.metric_best):
+            self.metric_best_epoch = self.epoch_idx
 
         if self.monitor not in self.logs:
             print(f"{self.monitor} not in {self.logs.keys()}")
@@ -58,18 +69,21 @@ class Trainer:
         if not self.save_best_weight:
             return
 
-        if self.logs[self.monitor][-1] != self.mode(self.logs[self.monitor], self.metric_best):
+        if self.logs[self.monitor][-1] != self.mode(self.logs[self.monitor][-1], self.metric_best):
             return
+
+        if not os.path.exists(self.filepath):
+            os.makedirs(self.filepath)
 
         fpath = os.path.join(self.filepath, 'best_weight.pth')
         torch.save(self.model.state_dict(), fpath)
+        print('Best weight saved!')
         
 
     def load_model(self):
         ''' Load model '''
         if not self.prev_weight:
             return
-
         try:
             fpath = os.path.join(self.filepath, 'best_weight.pth')
             self.model.load_state_dict(torch.load(fpath), strict=False)
@@ -78,32 +92,47 @@ class Trainer:
             print('Could not load previous best weight')
 
     
-    def save_checkpoint(self):
+    def save_checkpoint(self, epoch):
+        
+        if epoch-self.last_checkpoint_epoch < self.checkpoint_freq:
+            return
+
         fpath = os.path.join(self.filepath, 'model_checkpoint.pkl')
-        self.logs['model_weight'] = self.model.state_dict()
+        logs  = {'logs': self.logs}
+        logs['model_weight'] = self.model.state_dict()
+        logs['optimizer_weight'] = self.model.optimizer.state_dict()
+
+        if not os.path.exists(self.filepath):
+            os.makedirs(self.filepath)
 
         with open(fpath, 'wb') as file:
-            pickle.dump(self.logs, file)
+            pickle.dump(logs, file)
+        
+        self.last_checkpoint_epoch = epoch
+        print('Checkpoint saved!')
 
 
-    def load_checkpoint(self):
-        fpath = os.path.join(self.filepath, 'model_checkpoint.pkl')
+    def load_checkpoint(self, path:str):
+        fpath = os.path.join(path, 'model_checkpoint.pkl')
 
         if os.path.exists(fpath):
             with open(fpath, 'rb') as file:
                 checkpoint = pickle.load(file)
-                self.metric_best = self.mode(checkpoint['logs'][self.monitor])
-                self.logs = checkpoint['logs']
-                #fresh_start = False
 
                 try:
-                    model.load_state_dict(checkpoint['model_weight'], strict=True)
-                    print('Checkpoint model loaded')
+                    self.model.load_state_dict(checkpoint['model_weight'], strict=False)
+                    self.model.optimizer.load_state_dict(checkpoint['optimizer_weight'])
+                    self.metric_best = self.mode(checkpoint['logs'][self.monitor])
+                    self.logs = checkpoint['logs']
+                    self.epoch_idx = self.logs['epoch'][-1]
+                    print('Checkpoint model loaded!')
+                    print("Starting from epoch", self.logs['epoch'][-1])
+                    print(f"Best {self.monitor}: {self.metric_best:.4f}")
                 except:
                     print('Checkpoint model cannot be loaded')
-            
-                print("Starting from epoch", checkpoint['epoch'][-1])
-                print(f"Best {self.monitor}: {self.metric_best:.4f}")
+                
+        else:
+            print(f'Checkpoint path {fpath} does not exist!')
 
 
 
@@ -112,6 +141,7 @@ class Trainer:
 
         if mode != '': mode = mode + '_'
         if to is None: to = self.logs
+        #print(logs.items())
 
         for k, v in logs.items():
             k = f"{mode}{k}"
@@ -119,10 +149,15 @@ class Trainer:
             if k not in to:
                 to[k] = []
             
-            if isinstance(v, torch.Tensor):
-                to[k].append(v[-1].item())
+            if isinstance(v, list):
+                vv = v[-1]
             else:
-                to[k].append(v[-1])
+                vv = v
+            
+            if isinstance(vv, torch.Tensor):
+                to[k].append(vv.item())
+            else:
+                to[k].append(vv)
 
 
     def train(self):
@@ -130,27 +165,46 @@ class Trainer:
 
         self.preprocess()
 
+        # output flush
+        sys.stdout.flush()
+        sys.stderr.flush()
+
         # Starting epoch
         while self.epoch_idx <= self.epoch:
             self.logs['epoch'].append(self.epoch_idx)
 
-            # Starting epoch
-            self.on_epoch_begin()
             # Training
             self._train()
+            
             # Validation
             if self.val_data:
                 self._validate()
 
+
+            # callbacks
+            if self.callbacks is not None:
+                for callback in self.callbacks:
+                    out = callback(self.epoch_idx, self.model)
+                    if out is not None:
+                        self.dump_logs(out)
+
             # Progress printing
-            self.on_epoch_end()
             self.progbar()
             
             # Saving checkpoint and model
-            self.save_checkpoint()
+            self.save_checkpoint(self.epoch_idx)
             self.save_best()
 
+            if self.early_stop is not None:
+                if self.epoch_idx - self.metric_best_epoch >= self.early_stop:
+                    print("Early stopping model")
+                    break
+
             self.epoch_idx += 1
+
+            # output flush
+            sys.stdout.flush()
+            sys.stderr.flush()
 
 
     def _train(self):
@@ -161,14 +215,13 @@ class Trainer:
         self.on_epoch_begin(mode='train')
         
         for x, y in self.train_data:
-            self.on_batch_begin()
+            self.on_batch_begin(mode='train')
 
-            x, y = x.to(self.device), y.to(self.device)
-
-            with torch.autocast(device_type=self.device, dtype=torch.float16, enabled=True):    
+            # dtype can be torch.float16
+            with torch.autocast(device_type='cuda', dtype=torch.float32, enabled=True):    
                 
                 # output is a dictionary
-                logs = self.model.forward(x, y)
+                logs = self.model.get_loss(x, y)
                 batch_loss = logs['loss']
 
                 self.dump_logs(logs, to=batch_log)
@@ -177,36 +230,68 @@ class Trainer:
                 scaler.step(self.model.optimizer)
                 scaler.update()
 
-            self.on_batch_end()
-        
-        self.on_epoch_end(mode='train')
+            self.on_batch_end(mode='train')
 
+        self.on_epoch_end(mode='train')
         tmp_log = []
         for k in batch_log.keys():
             tmp_log.append(('train_'+k, [sum(batch_log[k]) / len(batch_log[k])]))
         batch_log = dict(tmp_log)
-        batch_log['time'] = [self.edtime-self.sttime]
+        batch_log['train_time'] = [self.edtime-self.sttime]
         self.dump_logs(batch_log, mode='')
         
 
 
     def _validate(self):
-        pass
+        ''' Training function '''
+
+        scaler = torch.cuda.amp.GradScaler(enabled=True)
+        batch_log = {}
+        self.on_epoch_begin(mode='val')
+        
+        for x, y in self.train_data:
+            self.on_batch_begin(mode='val')
+
+            # dtype can be torch.float16
+            with torch.autocast(device_type='cuda', dtype=torch.float32, enabled=True):    
+
+                # output is a dictionary
+                logs = self.model.get_loss(x, y)
+                self.dump_logs(logs, to=batch_log)
+                
+            self.on_batch_end(mode='val')
+
+        self.on_epoch_end(mode='val')
+        tmp_log = []
+        for k in batch_log.keys():
+            tmp_log.append(('val_'+k, [sum(batch_log[k]) / len(batch_log[k])]))
+        batch_log = dict(tmp_log)
+        batch_log['val_time'] = [self.edtime-self.sttime]
+        self.dump_logs(batch_log, mode='')
     
+
 
     def on_epoch_begin(self, mode='train'):
         self.sttime = time.time()
+        
+        if mode == 'train':
+            self.model.train()
+
+        elif mode == 'val':
+            self.model.eval()
 
 
     def on_epoch_end(self, mode='train'):
         self.edtime = time.time()
         
-        if self.model.scheduler: 
+        if mode == 'train' and self.model.scheduler: 
             self.model.scheduler.step()
 
 
     def on_batch_begin(self, mode='train'):
-        pass
+
+        self.model.optimizer.zero_grad(set_to_none=True)
+        
 
 
     def on_batch_end(self, mode='train'):
