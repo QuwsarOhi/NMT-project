@@ -1,5 +1,6 @@
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 import datasets, os
+from typing import Tuple
 
 
 class DataGen(Dataset):
@@ -66,6 +67,29 @@ class DataGen(Dataset):
             print(f"{self.in_lang} : {inp}\n{self.out_lang} : {out}")
 
         return inp, out
+
+
+
+def get_dataset(batch_size, drop_last=True, shuffle=True, num_workers=4, 
+                pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
+
+
+    train_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
+                            batch_size=batch_size, shuffle=shuffle, 
+                            drop_last=drop_last, num_workers=num_workers, 
+                            pin_memory=pin_memory)
+    
+    val_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='validation'),
+                          batch_size=batch_size, shuffle=shuffle, 
+                          drop_last=drop_last, num_workers=num_workers, 
+                          pin_memory=pin_memory)
+    
+    test_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
+                           batch_size=batch_size, shuffle=shuffle, 
+                           drop_last=drop_last, num_workers=num_workers, 
+                           pin_memory=pin_memory)
+    
+    return train_data, val_data, test_data
 
 
 
