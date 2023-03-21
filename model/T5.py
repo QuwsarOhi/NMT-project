@@ -2,7 +2,7 @@
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from torch import Tensor
 from torch.nn import Module
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import torch
 import torch.nn.functional as F
 
@@ -22,13 +22,15 @@ class T5(Module):
         # Assertions
         assert variant in ["t5-small", "t5-base", "t5-large"]
 
+        super().__init__()
+
         self.variant            = variant
         self.max_source_length  = max_source_length
         self.max_target_length  = max_target_length
 
         # Tokenizer & model
-        self.tokenizer          = T5Tokenizer.from_pretrained("t5-small")
-        self.model              = T5ForConditionalGeneration.from_pretrained("t5-small")
+        self.tokenizer          = T5Tokenizer.from_pretrained(variant)
+        self.model              = T5ForConditionalGeneration.from_pretrained(variant)
         
         # Optimier
         self.optimizer          = torch.optim.AdamW(self.parameters(), **optimizer_config)
@@ -37,7 +39,16 @@ class T5(Module):
         self.scheduler          = None
 
 
-    def forward(self, input:List[str], target:Optional[List[str]]=None) -> Tensor:
+    def tokenize(self, input:List[str]):
+
+        out = self.tokenizer(input, max_length=self.max_source_length,
+                             truncation=True, padding=True, 
+                             return_tensors="pt")
+
+        return out.input_ids, out.attention_mask
+
+
+    def forward(self, input:List[str], target:Optional[List[str]]=None) -> Tuple[Tensor, Optional[Tensor]]:
 
         '''
         Will receive input and target string and produce the final output as tensor (not decoded)
@@ -54,7 +65,6 @@ class T5(Module):
         '''
 
         pass
-        
 
 
 if __name__ == '__main__':
