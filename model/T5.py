@@ -15,17 +15,26 @@ class T5(Module):
     def __init__(self, 
                  variant:str="t5-small",
                  max_source_length:int=512, 
-                 max_target_length:int=128
+                 max_target_length:int=128,
+                 optimizer_config:dict={},
                 ):
 
+        # Assertions
         assert variant in ["t5-small", "t5-base", "t5-large"]
 
-        self.variant = variant
-        self.max_source_length = max_source_length
-        self.max_target_length = max_target_length
+        self.variant            = variant
+        self.max_source_length  = max_source_length
+        self.max_target_length  = max_target_length
 
-        self.tokenizer = T5Tokenizer.from_pretrained("t5-small")
-        self.model = T5ForConditionalGeneration.from_pretrained("t5-small")
+        # Tokenizer & model
+        self.tokenizer          = T5Tokenizer.from_pretrained("t5-small")
+        self.model              = T5ForConditionalGeneration.from_pretrained("t5-small")
+        
+        # Optimier
+        self.optimizer          = torch.optim.AdamW(self.parameters(), **optimizer_config)
+        
+        # Scheduler
+        self.scheduler          = None
 
 
     def forward(self, input:List[str], target:Optional[List[str]]=None) -> Tensor:
@@ -45,6 +54,7 @@ class T5(Module):
         '''
 
         pass
+        
 
 
 if __name__ == '__main__':
