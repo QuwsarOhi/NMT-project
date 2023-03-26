@@ -1,5 +1,5 @@
 
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import T5TokenizerFast, T5ForConditionalGeneration
 from torch import Tensor
 from torch.nn import Module
 from typing import List, Optional, Tuple
@@ -14,7 +14,7 @@ class T5(Module):
 
     def __init__(self, 
                  variant:str="t5-small",
-                 max_source_length:int=512, 
+                 max_source_length:int=256, 
                  max_target_length:int=128,
                  optimizer_config:dict={},
                 ):
@@ -29,7 +29,8 @@ class T5(Module):
         self.max_target_length  = max_target_length
 
         # Tokenizer & model
-        self.tokenizer          = T5Tokenizer.from_pretrained(variant)
+        self.tokenizer          = T5TokenizerFast.from_pretrained(variant,
+                                                                  model_max_length=self.max_source_length)
         self.model              = T5ForConditionalGeneration.from_pretrained(variant)
         
         # Optimizer
@@ -42,7 +43,7 @@ class T5(Module):
     def tokenize(self, input:List[str]):
 
         out = self.tokenizer(input, max_length=self.max_source_length,
-                             truncation=False, padding=True, 
+                             truncation=True, padding=True, 
                              return_tensors="pt")
 
         return out.input_ids, out.attention_mask
@@ -63,8 +64,7 @@ class T5(Module):
             return output.logits, output.loss
             
         return self.model.generate(input_ids=input_ids,
-                                   max_length=128,
-                                   max_new_tokens=20), None
+                                   max_new_tokens=8), None
 
 
 
@@ -111,5 +111,6 @@ if __name__ == '__main__':
     print(outputs)
     #for (inp, out), tar in zip(zip(inputs, outputs), targets):
     #    print(f"Input: {inp}\nOutput: {out}\nTarget: {tar}\n")
+
 
 
