@@ -1,5 +1,5 @@
 {
-    "device": "cuda",
+    "device": "cpu",
     
     "dataset": {
         "batch_size": 8,

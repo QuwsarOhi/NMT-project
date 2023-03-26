@@ -71,20 +71,20 @@ class DataGen(Dataset):
 
 
 def get_dataset(batch_size, drop_last=True, shuffle=True, num_workers=4, 
-                pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
+                pin_memory=True, verbose=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
 
 
-    train_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
+    train_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='train'),
                             batch_size=batch_size, shuffle=shuffle, 
                             drop_last=drop_last, num_workers=num_workers, 
                             pin_memory=pin_memory)
     
-    val_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='validation'),
+    val_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='validation'),
                           batch_size=batch_size, shuffle=shuffle, 
                           drop_last=drop_last, num_workers=num_workers, 
                           pin_memory=pin_memory)
     
-    test_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
+    test_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='train'),
                            batch_size=batch_size, shuffle=shuffle, 
                            drop_last=drop_last, num_workers=num_workers, 
                            pin_memory=pin_memory)
