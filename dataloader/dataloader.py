@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader, Dataset
 import datasets, os
 from typing import Tuple
+from torch.utils.data import ConcatDataset
 
 
 class DataGen(Dataset):
@@ -42,6 +43,7 @@ class DataGen(Dataset):
 
         self.dataset = datasets.load_dataset("iwslt2017", 
                                              self.config,
+                                             keep_in_memory=True,
                                              cache_dir=self.cache_dir)[self.data_split]
 
         # Input and output language short-code
@@ -70,22 +72,34 @@ class DataGen(Dataset):
 
 
 
-def get_dataset(batch_size, drop_last=True, shuffle=True, num_workers=4, 
-                pin_memory=True, verbose=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def get_dataset(batch_size, drop_last=True, num_workers=4, 
+                pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
 
+    train_data = []
+    val_data = []
+    test_data = []
 
-    train_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='train'),
-                            batch_size=batch_size, shuffle=shuffle, 
+    for i in range(24):
+        train_data.append(DataGen(config_id=i, verbose=False, data_split='train'))
+        val_data.append(DataGen(config_id=i, verbose=False, data_split='validation'))
+        test_data.append(DataGen(config_id=i, verbose=False, data_split='test'))
+
+    train_data = ConcatDataset(train_data)
+    val_data = ConcatDataset(val_data)
+    test_data = ConcatDataset(test_data)
+    
+    train_data = DataLoader(train_data,
+                            batch_size=batch_size, shuffle=True, 
                             drop_last=drop_last, num_workers=num_workers, 
                             pin_memory=pin_memory)
     
-    val_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='validation'),
-                          batch_size=batch_size, shuffle=shuffle, 
+    val_data = DataLoader(val_data,
+                          batch_size=batch_size, shuffle=False, 
                           drop_last=drop_last, num_workers=num_workers, 
                           pin_memory=pin_memory)
     
-    test_data = DataLoader(DataGen(config_id=15, verbose=verbose, data_split='train'),
-                           batch_size=batch_size, shuffle=shuffle, 
+    test_data = DataLoader(test_data,
+                           batch_size=batch_size, shuffle=False, 
                            drop_last=drop_last, num_workers=num_workers, 
                            pin_memory=pin_memory)
     

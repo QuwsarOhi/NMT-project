@@ -3,7 +3,7 @@ from transformers import T5TokenizerFast, T5ForConditionalGeneration
 from torch import Tensor
 from torch.nn import Module
 from typing import List, Optional, Tuple
-import torch
+import torch, os
 import torch.nn.functional as F
 
 
@@ -46,7 +46,7 @@ class T5(Module):
                              truncation=True, padding=True, 
                              return_tensors="pt")
 
-        return out.input_ids, out.attention_mask
+        return out.input_ids.cuda(), out.attention_mask.cuda()
 
 
     def forward(self, input:List[str], label:Optional[List[str]]=None) -> Tuple[Tensor, Optional[Tensor]]:

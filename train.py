@@ -21,18 +21,28 @@ seed_everything(SEED)
 with open("config.json", "r") as f:
     config = json.load(f)
 
+
 train_data, val_data, test_data = get_dataset(**config['dataset'])
 
-model = T5()
+
+# Disable tokernizer parallelism
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+model = T5().cuda()
+
+# Freezing model layers
+if 'freeze_till' in config['model']:
+    lst_layer = config['model']['freeze_till']
+    
+    for idx, (name, param) in enumerate(model.named_parameters()):
+        if idx <= lst_layer:
+            param.requires_grad = False
+        else:
+            break
+
+
 litmodel = Trainer(model, batch_size=config['dataset']['batch_size'])
 
-print("DONE")
-
-trainer = pl.Trainer(limit_train_batches=100, max_epochs=1,
-                     deterministic=True,
-                     accelerator="cpu", 
-                     #auto_lr_find=True
-                     )
+trainer = pl.Trainer(**config['trainer'])
 
 #lf_finder = trainer.tuner.lf_find()
 
