@@ -32,7 +32,6 @@ model = T5().cuda()
 # Freezing model layers
 if 'freeze_till' in config['model']:
     lst_layer = config['model']['freeze_till']
-    
     for idx, (name, param) in enumerate(model.named_parameters()):
         if idx <= lst_layer:
             param.requires_grad = False
