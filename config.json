@@ -2,6 +2,7 @@
     "device": "cuda",
     
     "dataset": {
+        "cache_dir": "/home/mdabuquwsar.ohi/codes/dataset",
         "batch_size": 64,
         "num_workers": 1
     },

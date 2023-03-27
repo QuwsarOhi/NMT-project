@@ -12,8 +12,7 @@ class DataGen(Dataset):
                  config_id:int,                 # which config id (language mapping) to be used
                  verbose:bool=True,             # verbose logging
                  data_split:str='train',         # data split [train, test, val]
-                 #'../dataset'
-                 cache_dir:str='/home/mdabuquwsar.ohi/codes/dataset',    # path to where the data will be saved
+                 cache_dir:str='../dataset',    # path to where the data will be saved
                 ):
     
 
@@ -94,16 +93,19 @@ class DataGen(Dataset):
 
 
 def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4, 
-                pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
+                pin_memory=True, cache_dir='') -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_data = []
     val_data = []
     test_data = []
+    
+    if cache_dir:
+        cache_dir = '../dataset'
 
     for i in range(ids):
-        train_data.append(DataGen(config_id=i, verbose=False, data_split='train'))
-        val_data.append(DataGen(config_id=i, verbose=False, data_split='validation'))
-        test_data.append(DataGen(config_id=i, verbose=False, data_split='test'))
+        train_data.append(DataGen(config_id=i, verbose=False, data_split='train', cache_dir=cache_dir))
+        val_data.append(DataGen(config_id=i, verbose=False, data_split='validation', cache_dir=cache_dir))
+        test_data.append(DataGen(config_id=i, verbose=False, data_split='test', cache_dir=cache_dir))
 
     train_data = ConcatDataset(train_data)
     val_data = ConcatDataset(val_data)
