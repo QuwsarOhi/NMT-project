@@ -3,6 +3,8 @@ import datasets, os
 from typing import Tuple
 from torch.utils.data import ConcatDataset
 
+datasets.disable_progress_bar()
+
 
 class DataGen(Dataset):
 
@@ -10,7 +12,8 @@ class DataGen(Dataset):
                  config_id:int,                 # which config id (language mapping) to be used
                  verbose:bool=True,             # verbose logging
                  data_split:str='train',         # data split [train, test, val]
-                 cache_dir:str='../dataset',    # path to where the data will be saved
+                 #'../dataset'
+                 cache_dir:str='/home/mdabuquwsar.ohi/codes/dataset',    # path to where the data will be saved
                 ):
     
 
@@ -28,6 +31,20 @@ class DataGen(Dataset):
 
         assert data_split in ['train', 'test', 'validation']
 
+        # language maps
+        self.lang_map = {
+            "ko": "Korean",
+            "en": "English",
+            "nl": "Dutch",
+            "ja": "Japanese",
+            "ar": "Arabic",
+            "fr": "French",
+            "it": "Italian",
+            "ro": "Romanian",
+            "zh": "Chinese",
+            "de": "German"
+        }
+        
         # Vervosity
         self.verbose = verbose
         # Cache directory of dataset
@@ -48,6 +65,8 @@ class DataGen(Dataset):
 
         # Input and output language short-code
         [self.in_lang, self.out_lang] = self.config[10:].split('-')
+        self.frm = self.lang_map[self.in_lang]
+        self.to = self.lang_map[self.out_lang]
 
         if self.verbose:
             print(f"Loaded config : {self.config} -> {self.data_split} split")
@@ -64,6 +83,8 @@ class DataGen(Dataset):
 
         inp = data[self.in_lang]
         out = data[self.out_lang]
+        
+        inp = f"translate {self.frm} to {self.to}: {inp}"
         
         if self.verbose:
             print(f"{self.in_lang} : {inp}\n{self.out_lang} : {out}")
@@ -108,5 +129,6 @@ def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4,
 
 
 if __name__ == '__main__':
-    data = DataGen(config_id=15, verbose=True)
+    data = DataGen(config_id=0, #15 
+                   verbose=False)
     print(data[0])

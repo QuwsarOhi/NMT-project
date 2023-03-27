@@ -5,6 +5,7 @@ import os, shutil, sys
 import lightning.pytorch as pl
 from lightning.pytorch import seed_everything
 from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 
 from trainer.trainer import Trainer
 from dataloader.dataloader import get_dataset
@@ -48,7 +49,14 @@ checkpoint_callback = ModelCheckpoint(monitor="val_loss",
                                       mode='min',
                                       dirpath=config['trainer']['default_root_dir'])
 
-trainer = pl.Trainer(**config['trainer'], callbacks=[checkpoint_callback])
+early_stopping = EarlyStopping(monitor='val_loss', 
+                               patience=10, 
+                               verbose=True,
+                               mode='min')
+
+trainer = pl.Trainer(**config['trainer'], 
+                     callbacks=[checkpoint_callback, early_stopping]
+                    )
 
 #lf_finder = trainer.tuner.lf_find()
 

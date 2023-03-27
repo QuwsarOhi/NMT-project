@@ -2,7 +2,7 @@
     "device": "cuda",
     
     "dataset": {
-        "batch_size": 128,
+        "batch_size": 64,
         "num_workers": 1
     },
 
@@ -11,16 +11,17 @@
     },
 
     "trainer": {
-        "limit_train_batches": 1.0,
+        "limit_train_batches": 0.3,
         "max_epochs": 500,
-        "deterministic": true,
-        "log_every_n_steps": 512,
+        "deterministic": false,
+        "log_every_n_steps": 2048,
         "accelerator": "gpu",
         "check_val_every_n_epoch": 1,
         "precision": "16-mixed",
         "enable_progress_bar": false,
         "default_root_dir": "./train_logs",
         "enable_checkpointing": true,
-        "benchmark": true
+        "benchmark": true,
+        "max_time": "00:04:30:00"
     }
 }
