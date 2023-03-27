@@ -72,14 +72,14 @@ class DataGen(Dataset):
 
 
 
-def get_dataset(batch_size, drop_last=True, num_workers=4, 
+def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4, 
                 pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_data = []
     val_data = []
     test_data = []
 
-    for i in range(24):
+    for i in range(ids):
         train_data.append(DataGen(config_id=i, verbose=False, data_split='train'))
         val_data.append(DataGen(config_id=i, verbose=False, data_split='validation'))
         test_data.append(DataGen(config_id=i, verbose=False, data_split='test'))

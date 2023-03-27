@@ -2,6 +2,7 @@ from torch import optim
 from model import T5
 import lightning.pytorch as pl
 
+
 class Trainer(pl.LightningModule):
     
     def __init__(self, model:T5, batch_size):

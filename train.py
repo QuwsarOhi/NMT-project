@@ -4,6 +4,7 @@ import numpy as np
 import os, shutil, sys
 import lightning.pytorch as pl
 from lightning.pytorch import seed_everything
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 from trainer.trainer import Trainer
 from dataloader.dataloader import get_dataset
@@ -41,7 +42,13 @@ if 'freeze_till' in config['model']:
 
 litmodel = Trainer(model, batch_size=config['dataset']['batch_size'])
 
-trainer = pl.Trainer(**config['trainer'])
+
+checkpoint_callback = ModelCheckpoint(monitor="val_loss",
+                                      save_top_k=1,
+                                      mode='min',
+                                      dirpath=config['trainer']['default_root_dir'])
+
+trainer = pl.Trainer(**config['trainer'], callbacks=[checkpoint_callback])
 
 #lf_finder = trainer.tuner.lf_find()
 
