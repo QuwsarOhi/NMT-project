@@ -41,7 +41,8 @@ if 'freeze_till' in config['model']:
             break
 
 
-litmodel = Trainer(model, batch_size=config['dataset']['batch_size'])
+litmodel = Trainer(model, batch_size=config['dataset']['batch_size'],
+                   optim_args=config['optim_args'])
 
 
 checkpoint_callback = ModelCheckpoint(monitor="val_loss",
@@ -61,6 +62,4 @@ trainer = pl.Trainer(**config['trainer'],
 #lf_finder = trainer.tuner.lf_find()
 
 trainer.fit(model=litmodel, train_dataloaders=train_data,
-            val_dataloaders=val_data)
-
-#trainer.train()
+            val_dataloaders=val_data, **config['fit'])

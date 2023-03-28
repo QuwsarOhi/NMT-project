@@ -2,13 +2,17 @@
     "device": "cuda",
     
     "dataset": {
-        "cache_dir": "/home/mdabuquwsar.ohi/codes/dataset",
-        "batch_size": 64,
+        "cache_dir": "../dataset",
+        "batch_size": 32,
         "num_workers": 1
     },
 
     "model": {
-        "freeze_till": 116
+        "freeze_till": 102
+    },
+
+    "optim_args": {
+        "lr": 1e-6
     },
 
     "trainer": {
@@ -20,9 +24,13 @@
         "check_val_every_n_epoch": 1,
         "precision": "16-mixed",
         "enable_progress_bar": false,
-        "default_root_dir": "./train_logs",
+        "default_root_dir": "./logs",
         "enable_checkpointing": true,
         "benchmark": true,
-        "max_time": "00:04:30:00"
+        "max_time": null
+    },
+
+    "fit": {
+        "ckpt_path": null
     }
 }
