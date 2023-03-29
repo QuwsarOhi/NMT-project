@@ -1,9 +1,9 @@
 
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import T5TokenizerFast, T5ForConditionalGeneration
 from torch import Tensor
 from torch.nn import Module
 from typing import List, Optional, Tuple
-import torch
+import torch, os
 import torch.nn.functional as F
 
 
@@ -14,7 +14,7 @@ class T5(Module):
 
     def __init__(self, 
                  variant:str="t5-small",
-                 max_source_length:int=512, 
+                 max_source_length:int=256, 
                  max_target_length:int=128,
                  optimizer_config:dict={},
                 ):
@@ -29,10 +29,11 @@ class T5(Module):
         self.max_target_length  = max_target_length
 
         # Tokenizer & model
-        self.tokenizer          = T5Tokenizer.from_pretrained(variant)
+        self.tokenizer          = T5TokenizerFast.from_pretrained(variant,
+                                                                  model_max_length=self.max_source_length)
         self.model              = T5ForConditionalGeneration.from_pretrained(variant)
         
-        # Optimier
+        # Optimizer
         self.optimizer          = torch.optim.AdamW(self.parameters(), **optimizer_config)
         
         # Scheduler
@@ -45,17 +46,26 @@ class T5(Module):
                              truncation=True, padding=True, 
                              return_tensors="pt")
 
-        return out.input_ids, out.attention_mask
+        return out.input_ids.cuda(), out.attention_mask.cuda()
 
 
-    def forward(self, input:List[str], target:Optional[List[str]]=None) -> Tuple[Tensor, Optional[Tensor]]:
+    def forward(self, input:List[str], label:Optional[List[str]]=None) -> Tuple[Tensor, Optional[Tensor]]:
 
         '''
         Will receive input and target string and produce the final output as tensor (not decoded)
         when target is not None, it will give the loss functions with the output as tuple
         '''
+        
+        input_ids, input_masks = self.tokenize(input)
+        
+        if label is not None:
+            label_ids, label_masks = self.tokenize(label)    
+            output = self.model(input_ids=input_ids, labels=label_ids)
+            return output.logits, output.loss
+            
+        return self.model.generate(input_ids=input_ids,
+                                   max_new_tokens=8), None
 
-        pass
 
 
     def predict(self, input:List[str]) -> List[str]:
@@ -63,8 +73,11 @@ class T5(Module):
         '''
         Will generate the target output as string
         '''
-
-        pass
+        
+        logits, loss = self.forward(input=input)
+        
+        return self.tokenizer.batch_decode(logits, skip_special_tokens=True)
+        
 
 
 if __name__ == '__main__':
@@ -72,4 +85,32 @@ if __name__ == '__main__':
     '''
     Implement a tester class similar to T5-old.py to test if it works
     '''
+    
+    model = T5('t5-small')
+
+    inputs = [
+        "translate English to German: Thank you so much, Chris.",
+        "translate English to German: I have been blown away by this conference, and I want to thank all of you for the many nice comments about what I had to say the other night.",
+        "translate German to English: Es ist mir wirklich eine Ehre, zweimal auf dieser Bühne stehen zu dürfen. Tausend Dank dafür.",
+    ]
+
+    targets = [
+        "Vielen Dank, Chris.",
+        "Ich bin wirklich begeistert von dieser Konferenz, und ich danke Ihnen allen für die vielen netten Kommentare zu meiner Rede vorgestern Abend.",
+        "And it's truly a great honor to have the opportunity to come to this stage twice; I'm extremely grateful.",
+    ]
+
+    logits, loss = model.forward(inputs, targets)
+    print('Model forward')
+    print('logits: ', logits)
+    print('loss: ', loss)
+    
+    outputs = model.predict(inputs)
+    
+    print('OUTPUT')
+    print(outputs)
+    #for (inp, out), tar in zip(zip(inputs, outputs), targets):
+    #    print(f"Input: {inp}\nOutput: {out}\nTarget: {tar}\n")
+
+
 

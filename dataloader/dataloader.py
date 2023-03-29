@@ -1,6 +1,9 @@
 from torch.utils.data import DataLoader, Dataset
 import datasets, os
 from typing import Tuple
+from torch.utils.data import ConcatDataset
+
+datasets.disable_progress_bar()
 
 
 class DataGen(Dataset):
@@ -27,6 +30,20 @@ class DataGen(Dataset):
 
         assert data_split in ['train', 'test', 'validation']
 
+        # language maps
+        self.lang_map = {
+            "ko": "Korean",
+            "en": "English",
+            "nl": "Dutch",
+            "ja": "Japanese",
+            "ar": "Arabic",
+            "fr": "French",
+            "it": "Italian",
+            "ro": "Romanian",
+            "zh": "Chinese",
+            "de": "German"
+        }
+        
         # Vervosity
         self.verbose = verbose
         # Cache directory of dataset
@@ -42,10 +59,13 @@ class DataGen(Dataset):
 
         self.dataset = datasets.load_dataset("iwslt2017", 
                                              self.config,
+                                             keep_in_memory=True,
                                              cache_dir=self.cache_dir)[self.data_split]
 
         # Input and output language short-code
         [self.in_lang, self.out_lang] = self.config[10:].split('-')
+        self.frm = self.lang_map[self.in_lang]
+        self.to = self.lang_map[self.out_lang]
 
         if self.verbose:
             print(f"Loaded config : {self.config} -> {self.data_split} split")
@@ -63,6 +83,8 @@ class DataGen(Dataset):
         inp = data[self.in_lang]
         out = data[self.out_lang]
         
+        inp = f"translate {self.frm} to {self.to}: {inp}"
+        
         if self.verbose:
             print(f"{self.in_lang} : {inp}\n{self.out_lang} : {out}")
 
@@ -70,22 +92,37 @@ class DataGen(Dataset):
 
 
 
-def get_dataset(batch_size, drop_last=True, shuffle=True, num_workers=4, 
-                pin_memory=True) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4, 
+                pin_memory=True, cache_dir='') -> Tuple[DataLoader, DataLoader, DataLoader]:
 
+    train_data = []
+    val_data = []
+    test_data = []
+    
+    if cache_dir:
+        cache_dir = '../dataset'
 
-    train_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
-                            batch_size=batch_size, shuffle=shuffle, 
+    for i in range(ids):
+        train_data.append(DataGen(config_id=i, verbose=False, data_split='train', cache_dir=cache_dir))
+        val_data.append(DataGen(config_id=i, verbose=False, data_split='validation', cache_dir=cache_dir))
+        test_data.append(DataGen(config_id=i, verbose=False, data_split='test', cache_dir=cache_dir))
+
+    train_data = ConcatDataset(train_data)
+    val_data = ConcatDataset(val_data)
+    test_data = ConcatDataset(test_data)
+    
+    train_data = DataLoader(train_data,
+                            batch_size=batch_size, shuffle=True, 
                             drop_last=drop_last, num_workers=num_workers, 
                             pin_memory=pin_memory)
     
-    val_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='validation'),
-                          batch_size=batch_size, shuffle=shuffle, 
+    val_data = DataLoader(val_data,
+                          batch_size=batch_size, shuffle=False, 
                           drop_last=drop_last, num_workers=num_workers, 
                           pin_memory=pin_memory)
     
-    test_data = DataLoader(DataGen(config_id=15, verbose=True, data_split='train'),
-                           batch_size=batch_size, shuffle=shuffle, 
+    test_data = DataLoader(test_data,
+                           batch_size=batch_size, shuffle=False, 
                            drop_last=drop_last, num_workers=num_workers, 
                            pin_memory=pin_memory)
     
@@ -94,5 +131,6 @@ def get_dataset(batch_size, drop_last=True, shuffle=True, num_workers=4,
 
 
 if __name__ == '__main__':
-    data = DataGen(config_id=15, verbose=True)
+    data = DataGen(config_id=0, #15 
+                   verbose=False)
     print(data[0])
