@@ -1,11 +1,11 @@
-# PyTorch Template Project
-PyTorch deep learning project made easy.
+# Cross-cultural communication using Machine Translation
+A use of machine translation, an NLP technique, for language translation for efficient cross-cultural communication.
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-* [PyTorch Template Project](#pytorch-template-project)
+* [PyTorch Template Project](#Project Content)
 	* [Requirements](#requirements)
 	* [Features](#features)
 	* [Folder Structure](#folder-structure)
@@ -33,10 +33,10 @@ PyTorch deep learning project made easy.
 <!-- /code_chunk_output -->
 
 ## Requirements
-* Python >= 3.5 (3.6 recommended)
-* PyTorch >= 0.4 (1.2 recommended)
-* tqdm (Optional for `test.py`)
-* tensorboard >= 1.14 (see [Tensorboard Visualization](#tensorboard-visualization))
+* Python >= 3.9 or above
+* PyTorch >= 2.0 or above
+* PytorchLightning >= 2.0 or above
+For more details please refer `requirements.txt`
 
 ## Features
 * Clear folder structure which is suitable for many deep learning projects.
@@ -44,57 +44,44 @@ PyTorch deep learning project made easy.
 * Customizable command line options for more convenient parameter tuning.
 * Checkpoint saving and resuming.
 * Abstract base classes for faster development:
-  * `BaseTrainer` handles checkpoint saving/resuming, training process logging, and more.
-  * `BaseDataLoader` handles batch generation, data shuffling, and validation data splitting.
+  * `Trainer` handles partial model training (using checkpoint saving/resuming), training process logging, and more.
+  * `DataLoader` handles batch generation, data shuffling, and training-validation-testing data splitting.
   * `BaseModel` provides basic model summary.
+  * `T5` provides implementation of T5 architecture from the huggingface community
 
 ## Folder Structure
   ```
-  pytorch-template/
+  NMT-project/
+  ├── README.md - Details of the complete project structure
   │
   ├── train.py - main script to start training
   ├── test.py - evaluation of trained model
   │
   ├── config.json - holds configuration for training
-  ├── parse_config.py - class to handle config file and cli options
   │
-  ├── new_project.py - initialize new project with template files
-  │
-  ├── base/ - abstract base classes
-  │   ├── base_data_loader.py
-  │   ├── base_model.py
-  │   └── base_trainer.py
-  │
-  ├── data_loader/ - anything about data loading goes here
+  ├── data_loader/ - data pre-processing and data loading
   │   └── data_loaders.py
   │
   ├── data/ - default directory for storing input data
   │
   ├── model/ - models, losses, and metrics
   │   ├── model.py
-  │   ├── metric.py
-  │   └── loss.py
   │
   ├── saved/
   │   ├── models/ - trained models are saved here
-  │   └── log/ - default logdir for tensorboard and logging output
+  │   └── logs/ - default logdir for tensorboard and logging output
   │
-  ├── trainer/ - trainers
+  ├── trainer/ - training, validation and model optimization
   │   └── trainer.py
-  │
-  ├── logger/ - module for tensorboard visualization and logging
-  │   ├── visualization.py
-  │   ├── logger.py
-  │   └── logger_config.json
   │  
   └── utils/ - small utility functions
       ├── util.py
-      └── ...
   ```
 
 ## Usage
-The code in this repo is an MNIST example of the template.
-Try `python train.py -c config.json` to run code.
+The code in this repository is an implementation of using T5 model for language translation using the techniques of Natural Language Processing in a Deep Learning Network.
+Try `python train.py -c config.json` to train.
+Try `python test.py -c config.json` to test.
 
 ### Config file format
 Config files are in `.json` format:
