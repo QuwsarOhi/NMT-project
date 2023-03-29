@@ -64,7 +64,7 @@ class T5(Module):
             return output.logits, output.loss
             
         return self.model.generate(input_ids=input_ids,
-                                   max_new_tokens=8), None
+                                   max_new_tokens=self.max_target_length), None
 
 
 
