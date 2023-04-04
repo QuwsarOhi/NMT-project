@@ -5,7 +5,7 @@ A use of machine translation, an NLP technique, for language translation for eff
 
 <!-- code_chunk_output -->
 
-* [PyTorch Template Project](#Project Content)
+* Project Content
 	* [Requirements](#requirements)
 	* [Features](#features)
 	* [Folder Structure](#folder-structure)
