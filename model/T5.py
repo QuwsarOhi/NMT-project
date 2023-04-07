@@ -29,9 +29,9 @@ class T5(Module):
         self.max_target_length  = max_target_length
 
         # Tokenizer & model
-        self.tokenizer          = T5TokenizerFast.from_pretrained(variant,
+        self.tokenizer          = T5TokenizerFast.from_pretrained(self.variant,
                                                                   model_max_length=self.max_source_length)
-        self.model              = T5ForConditionalGeneration.from_pretrained(variant)
+        self.model              = T5ForConditionalGeneration.from_pretrained(self.variant)
         
         # Optimizer
         self.optimizer          = torch.optim.AdamW(self.parameters(), **optimizer_config)
@@ -75,7 +75,6 @@ class T5(Module):
         '''
         
         logits, loss = self.forward(input=input)
-        
         return self.tokenizer.batch_decode(logits, skip_special_tokens=True)
         
 

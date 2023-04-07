@@ -4,7 +4,7 @@ import numpy as np
 import os, shutil, sys
 import lightning.pytorch as pl
 from lightning.pytorch import seed_everything
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 
 from trainer.trainer import Trainer
@@ -31,6 +31,9 @@ train_data, val_data, test_data = get_dataset(**config['dataset'])
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 model = T5().cuda()
 
+prev_path = "/home/btlab/Ohi/NMT-project/T5.pth"
+model.load_state_dict(torch.load(prev_path, map_location='cuda'))
+
 # Freezing model layers
 if 'freeze_till' in config['model']:
     lst_layer = config['model']['freeze_till']
@@ -56,10 +59,13 @@ early_stopping = EarlyStopping(monitor='val_loss',
                                mode='min')
 
 trainer = pl.Trainer(**config['trainer'], 
-                     callbacks=[checkpoint_callback, early_stopping]
+                     callbacks=[checkpoint_callback, early_stopping,
+                                StochasticWeightAveraging(swa_lrs=1e-2)
+                                ]
                     )
 
 #lf_finder = trainer.tuner.lf_find()
 
 trainer.fit(model=litmodel, train_dataloaders=train_data,
-            val_dataloaders=val_data, **config['fit'])
+            val_dataloaders=val_data, 
+            **config['fit'])

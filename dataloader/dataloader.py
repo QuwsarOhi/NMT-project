@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader, Dataset
 import datasets, os
-from typing import Tuple
+from typing import Tuple, List
 from torch.utils.data import ConcatDataset
 
 datasets.disable_progress_bar()
@@ -18,30 +18,35 @@ class DataGen(Dataset):
 
         # Dataset language maps
         self.config_name = [
-            'iwslt2017-en-it', 'iwslt2017-en-nl', 'iwslt2017-en-ro', 
-            'iwslt2017-it-en', 'iwslt2017-it-nl', 'iwslt2017-it-ro', 
-            'iwslt2017-nl-en', 'iwslt2017-nl-it', 'iwslt2017-nl-ro', 
-            'iwslt2017-ro-en', 'iwslt2017-ro-it', 'iwslt2017-ro-nl', 
-            'iwslt2017-ar-en', 'iwslt2017-de-en', 'iwslt2017-en-ar', 
-            'iwslt2017-en-de', 'iwslt2017-en-fr', 'iwslt2017-en-ja', 
-            'iwslt2017-en-ko', 'iwslt2017-en-zh', 'iwslt2017-fr-en', 
-            'iwslt2017-ja-en', 'iwslt2017-ko-en', 'iwslt2017-zh-en'
+            'iwslt2017-en-it', 'iwslt2017-it-en',
+            'iwslt2017-de-en', 'iwslt2017-en-de',
+            'iwslt2017-en-nl', 'iwslt2017-nl-en',
+            'iwslt2017-en-ro', 'iwslt2017-ro-en',
+            'iwslt2017-fr-en', 'iwslt2017-en-fr',
+            # Non-english mappings
+            'iwslt2017-it-nl', 'iwslt2017-nl-it',
+            'iwslt2017-ro-nl', 'iwslt2017-nl-ro', 
+            'iwslt2017-ro-it', 'iwslt2017-it-ro', 
+            #'iwslt2017-ko-en', 'iwslt2017-en-ko',
+            #'iwslt2017-en-ja', 'iwslt2017-ja-en',
+            #'iwslt2017-zh-en', 'iwslt2017-en-zh',
+            #'iwslt2017-ar-en', 'iwslt2017-en-ar', 
         ]
 
         assert data_split in ['train', 'test', 'validation']
 
         # language maps
         self.lang_map = {
-            "ko": "Korean",
-            "en": "English",
-            "nl": "Dutch",
-            "ja": "Japanese",
-            "ar": "Arabic",
-            "fr": "French",
-            "it": "Italian",
-            "ro": "Romanian",
-            "zh": "Chinese",
-            "de": "German"
+            #"ko": "Korean",
+            "en": "English",    # 
+            "nl": "Dutch",      #
+            #"ja": "Japanese",
+            #"ar": "Arabic",
+            "fr": "French",     #
+            "it": "Italian",    #
+            "ro": "Romanian",   #
+            #"zh": "Chinese",
+            "de": "German"      #
         }
         
         # Vervosity
@@ -91,8 +96,40 @@ class DataGen(Dataset):
         return inp, out
 
 
+class DataCollection(Dataset):
+    '''
+    Although the ConcatDataset can merge datasets into one
+    it does binary search each time its called making it 
+    unefficient.
+    So here is an memorized version of ConcatDataset.
+    It just saves the indices and fetches the indices 
+    on demand.
+    '''
+    
+    def __init__(self, data=List[Dataset]):
+        
+        super().__init__()
+        
+        self.indices        = []
+        self.datasets       = data
+        self.n_datasets     = len(self.datasets)
+        
+        for i in range(self.n_datasets):
+            for j in range(len(self.datasets[i])):
+                self.indices.append((i, j))
+        
+        
+    def __len__(self) -> int:
+        return len(self.indices)
+    
+    
+    def __getitem__(self, index) -> Tuple[List[str], List[str]]:
+        i, j = self.indices[index]
+        return self.datasets[i][j]
+        
+        
 
-def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4, 
+def get_dataset(batch_size, ids=10, drop_last=True, num_workers=4, 
                 pin_memory=True, cache_dir='') -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_data = []
@@ -107,9 +144,9 @@ def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4,
         val_data.append(DataGen(config_id=i, verbose=False, data_split='validation', cache_dir=cache_dir))
         test_data.append(DataGen(config_id=i, verbose=False, data_split='test', cache_dir=cache_dir))
 
-    train_data = ConcatDataset(train_data)
-    val_data = ConcatDataset(val_data)
-    test_data = ConcatDataset(test_data)
+    train_data = DataCollection(train_data)
+    val_data = DataCollection(val_data)
+    test_data = DataCollection(test_data)
     
     train_data = DataLoader(train_data,
                             batch_size=batch_size, shuffle=True, 
