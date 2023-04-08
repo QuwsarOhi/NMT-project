@@ -18,21 +18,19 @@ torch.manual_seed(SEED)
 np.random.seed(SEED)
 seed_everything(SEED)
 
-
 # loading config file
 with open("config.json", "r") as f:
     config = json.load(f)
 
+model = T5().cuda()
 
-train_data, val_data, test_data = get_dataset(**config['dataset'])
-
+if config["weight"]:
+    print("Loading weights from:", config["weight"])
+    model.load_state_dict(torch.load(config["weight"], map_location='cuda'))
 
 # Disable tokernizer parallelism
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-model = T5().cuda()
-
-prev_path = "/home/btlab/Ohi/NMT-project/T5.pth"
-model.load_state_dict(torch.load(prev_path, map_location='cuda'))
+train_data, val_data, test_data = get_dataset(**config['dataset'])
 
 # Freezing model layers
 if 'freeze_till' in config['model']:
