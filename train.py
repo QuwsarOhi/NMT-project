@@ -23,13 +23,14 @@ seed_everything(SEED)
 with open("config.json", "r") as f:
     config = json.load(f)
 
-
+# Data-split for Train:Validation:Test = 80:10:10
 train_data, val_data, test_data = get_dataset(**config['dataset'])
 
 
 # Disable tokernizer parallelism
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 model = T5().cuda()
+#model.to('cuda')
 
 # Freezing model layers
 if 'freeze_till' in config['model']:

@@ -92,7 +92,7 @@ class DataGen(Dataset):
 
 
 
-def get_dataset(batch_size, ids=24, drop_last=True, num_workers=4, 
+def get_dataset(batch_size, ids=1, drop_last=True, num_workers=4, 
                 pin_memory=True, cache_dir='') -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_data = []

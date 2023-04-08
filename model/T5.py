@@ -87,18 +87,22 @@ if __name__ == '__main__':
     '''
     
     model = T5('t5-small')
+    model.to('cuda')
 
-    inputs = [
-        "translate English to German: Thank you so much, Chris.",
-        "translate English to German: I have been blown away by this conference, and I want to thank all of you for the many nice comments about what I had to say the other night.",
-        "translate German to English: Es ist mir wirklich eine Ehre, zweimal auf dieser Bühne stehen zu dürfen. Tausend Dank dafür.",
-    ]
+    #inputs = [
+        #"translate English to German: Thank you so much, Chris.",
+        #"translate English to German: I have been blown away by this conference, and I want to thank all of you for the many nice comments about what I had to say the other night.",
+        #"translate German to English: Es ist mir wirklich eine Ehre, zweimal auf dieser Bühne stehen zu dürfen. Tausend Dank dafür.",
+    #]
 
-    targets = [
-        "Vielen Dank, Chris.",
-        "Ich bin wirklich begeistert von dieser Konferenz, und ich danke Ihnen allen für die vielen netten Kommentare zu meiner Rede vorgestern Abend.",
-        "And it's truly a great honor to have the opportunity to come to this stage twice; I'm extremely grateful.",
-    ]
+    #targets = [
+        #"Vielen Dank, Chris.",
+        #"Ich bin wirklich begeistert von dieser Konferenz, und ich danke Ihnen allen für die vielen netten Kommentare zu meiner Rede vorgestern Abend.",
+        #"And it's truly a great honor to have the opportunity to come to this stage twice; I'm extremely grateful.",
+    #]
+
+    inputs = ["Good Morning, How are you?"]
+    targets = ["Buongiorno, come stai?"]
 
     logits, loss = model.forward(inputs, targets)
     print('Model forward')
@@ -107,10 +111,10 @@ if __name__ == '__main__':
     
     outputs = model.predict(inputs)
     
-    print('OUTPUT')
-    print(outputs)
-    #for (inp, out), tar in zip(zip(inputs, outputs), targets):
-    #    print(f"Input: {inp}\nOutput: {out}\nTarget: {tar}\n")
+    #print('OUTPUT')
+    #print(outputs)
+    for (inp, out), tar in zip(zip(inputs, outputs), targets):
+        print(f"Input: \n{inp}\n\nOutput: \n{out}\n\nTarget: \n{tar}\n\n")
 
 
 
