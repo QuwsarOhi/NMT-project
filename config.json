@@ -2,13 +2,14 @@
     "device": "cuda:0",
     
     "dataset": {
+        "ids": [2],
         "cache_dir": "../dataset",
         "batch_size": 40,
         "num_workers": 32
     },
 
     "model": {
-        "freeze_till": 102
+        "freeze_till": -1
     },
 
     "optim_args": {
@@ -16,22 +17,24 @@
     },
 
     "trainer": {
-        "limit_train_batches": 0.2,
+        "limit_train_batches": 0.25,
         "devices": [0],
-        "max_epochs": 20,
+        "max_epochs": 640,
         "deterministic": false,
         "log_every_n_steps": 2048,
         "accelerator": "gpu",
         "check_val_every_n_epoch": 1,
         "precision": "16-mixed",
-        "enable_progress_bar": true,
+        "enable_progress_bar": false,
         "default_root_dir": "./logs",
         "enable_checkpointing": true,
         "benchmark": true,
-        "max_time": null
+        "max_time": "00:12:00:00"
     },
 
+    "weight": null,
+
     "fit": {
-        "ckpt_path": "/home/btlab/Ohi/NMT-project/logs/epoch=1-step=22566.ckpt"
+        "ckpt_path": null
     }
 }

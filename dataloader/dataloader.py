@@ -19,10 +19,10 @@ class DataGen(Dataset):
         # Dataset language maps
         self.config_name = [
             'iwslt2017-en-it', 'iwslt2017-it-en',
-            'iwslt2017-de-en', 'iwslt2017-en-de',
+            'iwslt2017-en-de', 'iwslt2017-de-en',
             'iwslt2017-en-nl', 'iwslt2017-nl-en',
             'iwslt2017-en-ro', 'iwslt2017-ro-en',
-            'iwslt2017-fr-en', 'iwslt2017-en-fr',
+            'iwslt2017-en-fr', 'iwslt2017-fr-en',
             # Non-english mappings
             'iwslt2017-it-nl', 'iwslt2017-nl-it',
             'iwslt2017-ro-nl', 'iwslt2017-nl-ro', 
@@ -129,7 +129,7 @@ class DataCollection(Dataset):
         
         
 
-def get_dataset(batch_size, ids=10, drop_last=True, num_workers=4, 
+def get_dataset(batch_size, ids=16, drop_last=True, num_workers=4, 
                 pin_memory=True, cache_dir='') -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_data = []
@@ -139,10 +139,13 @@ def get_dataset(batch_size, ids=10, drop_last=True, num_workers=4,
     if cache_dir:
         cache_dir = '../dataset'
 
-    for i in range(ids):
-        train_data.append(DataGen(config_id=i, verbose=False, data_split='train', cache_dir=cache_dir))
-        val_data.append(DataGen(config_id=i, verbose=False, data_split='validation', cache_dir=cache_dir))
-        test_data.append(DataGen(config_id=i, verbose=False, data_split='test', cache_dir=cache_dir))
+    if not isinstance(ids, list):
+        ids = [ids]
+
+    for id in ids:
+        train_data.append(DataGen(config_id=id, verbose=False, data_split='train', cache_dir=cache_dir))
+        val_data.append(DataGen(config_id=id, verbose=False, data_split='validation', cache_dir=cache_dir))
+        test_data.append(DataGen(config_id=id, verbose=False, data_split='test', cache_dir=cache_dir))
 
     train_data = DataCollection(train_data)
     val_data = DataCollection(val_data)
