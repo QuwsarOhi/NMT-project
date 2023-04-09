@@ -11,34 +11,39 @@ from trainer.trainer import Trainer
 from dataloader.dataloader import get_dataset
 from model.T5 import T5
 
+def main():
+    # fix random seeds for reproducibility
+    SEED = 123
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    seed_everything(SEED)
 
-# fix random seeds for reproducibility
-SEED = 123
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-seed_everything(SEED)
+    # loading config file
+    with open("config.json", "r") as f:
+        config = json.load(f)
 
+    # Disable tokernizer parallelism
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    model = T5().cuda()
 
-# loading config file
-with open("config.json", "r") as f:
-    config = json.load(f)
+    # Loading weights
+    print("Model weight", config["weight"])
+    model.load_state_dict(torch.load(config["weight"]))
 
-train_data, val_data, test_data = get_dataset(**config['dataset'])
+    train_data, val_data, test_data = get_dataset(**config['dataset'])
 
-# Disable tokernizer parallelism
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-model = T5().cuda()
+    litmodel = Trainer(model, batch_size=config['dataset']['batch_size'],
+                       optim_args=config['optim_args'])
 
-# Loading weights
-model.load_state_dict(torch.load('/home/btlab/Ohi/NMT-project/T5-v2.pth'))
+    # Adding progress bar by default
+    config['trainer']['enable_progress_bar'] = True
+    trainer = pl.Trainer(**config['trainer'])
 
-litmodel = Trainer(model, batch_size=config['dataset']['batch_size'],
-                   optim_args=config['optim_args'])
+    #lf_finder = trainer.tuner.lf_find()
 
-trainer = pl.Trainer(**config['trainer'])
+    trainer.validate(model=litmodel, dataloaders=val_data)
 
-#lf_finder = trainer.tuner.lf_find()
+    trainer.test(model=litmodel, dataloaders=test_data)
 
-trainer.test(model=litmodel, dataloaders=test_data)
-
-trainer.validate(model=litmodel, dataloaders=val_data)
+if __name__ == "__main__":
+    main()

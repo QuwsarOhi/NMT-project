@@ -1,0 +1,39 @@
+{
+    "device": "cuda",
+    
+    "dataset": {
+        "ids": [2],
+        "cache_dir": "../dataset",
+        "batch_size": 16,
+        "num_workers": 8
+    },
+
+    "model": {
+        "freeze_till": -1
+    },
+
+    "optim_args": {
+        "lr": 1e-4
+    },
+
+    "trainer": {
+        "limit_train_batches": 0.25,
+        "max_epochs": 1,
+        "deterministic": false,
+        "log_every_n_steps": 2048,
+        "accelerator": "gpu",
+        "check_val_every_n_epoch": 1,
+        "precision": "16-mixed",
+        "enable_progress_bar": true,
+        "default_root_dir": "./root",
+        "enable_checkpointing": true,
+        "benchmark": true,
+        "max_time": null
+    },
+
+    "weight": "./saved/models/T5.pth",
+
+    "fit": {
+        "ckpt_path": null
+    }
+}

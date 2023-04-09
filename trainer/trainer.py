@@ -1,12 +1,12 @@
 from torch import optim
-from model import T5
+#from model import T5
 import lightning.pytorch as pl
 from torchtext.data.metrics import bleu_score
 
 
 class Trainer(pl.LightningModule):
     
-    def __init__(self, model:T5, batch_size, optim_args):
+    def __init__(self, model, batch_size, optim_args):
         super().__init__()
         
         self.model = model

@@ -12,61 +12,68 @@ from dataloader.dataloader import get_dataset
 from model.T5 import T5
 
 
-# fix random seeds for reproducibility
-SEED = 123
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-seed_everything(SEED)
+def main():
+    # fix random seeds for reproducibility
+    SEED = 123
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    seed_everything(SEED)
 
 
-# loading config file
-with open("config.json", "r") as f:
-    config = json.load(f)
+    # loading config file
+    with open("config.json", "r") as f:
+        config = json.load(f)
 
-# Data-split for Train:Validation:Test = 80:10:10
-train_data, val_data, test_data = get_dataset(**config['dataset'])
-
-
-# Disable tokernizer parallelism
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-model = T5().cuda()
-#model.to('cuda')
-
-prev_path = "/home/btlab/Ohi/NMT-project/T5.pth"
-model.load_state_dict(torch.load(prev_path, map_location='cuda'))
-
-# Freezing model layers
-if 'freeze_till' in config['model']:
-    lst_layer = config['model']['freeze_till']
-    for idx, (name, param) in enumerate(model.named_parameters()):
-        if idx <= lst_layer:
-            param.requires_grad = False
-        else:
-            break
+    # Data-split for Train:Validation:Test = 80:10:10
+    train_data, val_data, test_data = get_dataset(**config['dataset'])
 
 
-litmodel = Trainer(model, batch_size=config['dataset']['batch_size'],
-                   optim_args=config['optim_args'])
+    # Disable tokernizer parallelism
+    os.environ["TOKENIZERS_PARALLELISM"] = "true"
+    #os.environ["use_multiprocessing"] = "false"
+    model = T5().cuda()
+    #model.to('cuda')
+
+    prev_path = config['weight']
+    if prev_path:
+        model.load_state_dict(torch.load(prev_path, map_location='cuda'))
+
+    # Freezing model layers
+    if 'freeze_till' in config['model']:
+        lst_layer = config['model']['freeze_till']
+        for idx, (name, param) in enumerate(model.named_parameters()):
+            if idx <= lst_layer:
+                param.requires_grad = False
+            else:
+                break
 
 
-checkpoint_callback = ModelCheckpoint(monitor="val_loss",
-                                      save_top_k=1,
-                                      mode='min',
-                                      dirpath=config['trainer']['default_root_dir'])
+    litmodel = Trainer(model, batch_size=config['dataset']['batch_size'],
+                       optim_args=config['optim_args'])
 
-early_stopping = EarlyStopping(monitor='val_loss', 
-                               patience=10, 
-                               verbose=True,
-                               mode='min')
 
-trainer = pl.Trainer(**config['trainer'], 
-                     callbacks=[checkpoint_callback, early_stopping,
-                                StochasticWeightAveraging(swa_lrs=1e-2)
-                                ]
-                    )
+    checkpoint_callback = ModelCheckpoint(monitor="val_loss",
+                                          save_top_k=1,
+                                          mode='min',
+                                          dirpath=config['trainer']['default_root_dir'])
 
-#lf_finder = trainer.tuner.lf_find()
+    early_stopping = EarlyStopping(monitor='val_loss', 
+                                   patience=10, 
+                                   verbose=True,
+                                   mode='min')
 
-trainer.fit(model=litmodel, train_dataloaders=train_data,
-            val_dataloaders=val_data, 
-            **config['fit'])
+    trainer = pl.Trainer(**config['trainer'], 
+                         callbacks=[checkpoint_callback, early_stopping,
+                                    StochasticWeightAveraging(swa_lrs=1e-2)
+                                    ]
+                        )
+
+    #lf_finder = trainer.tuner.lf_find()
+
+    trainer.fit(model=litmodel, train_dataloaders=train_data,
+                val_dataloaders=val_data, 
+                **config['fit'])
+
+
+if __name__ == '__main__':
+    main()
