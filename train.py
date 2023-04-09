@@ -18,8 +18,7 @@ def main():
     torch.manual_seed(SEED)
     np.random.seed(SEED)
     seed_everything(SEED)
-
-
+    
     # loading config file
     with open("config.json", "r") as f:
         config = json.load(f)
@@ -27,6 +26,7 @@ def main():
     # Data-split for Train:Validation:Test = 80:10:10
     train_data, val_data, test_data = get_dataset(**config['dataset'])
 
+    model = T5().cuda()
 
     # Disable tokernizer parallelism
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
