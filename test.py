@@ -40,10 +40,18 @@ def main():
     trainer = pl.Trainer(**config['trainer'])
 
     #lf_finder = trainer.tuner.lf_find()
+    
+    #print("\nValidation started for : "+Dataset(config_name['ids']))
 
     trainer.validate(model=litmodel, dataloaders=val_data)
-
+    
+    #print("\nValidation completed for : "+config['dataset']['ids'])
+    
+    #print("\nTesting started for : "+config['dataset']['ids'])
+    
     trainer.test(model=litmodel, dataloaders=test_data)
+
+    #print("\nTesting completed for : "+config['dataset']['ids'])
 
 if __name__ == "__main__":
     main()

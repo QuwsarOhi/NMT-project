@@ -2,7 +2,7 @@
     "device": "cuda",
     
     "dataset": {
-        "ids": [2],
+        "ids": [0],
         "cache_dir": "../dataset",
         "batch_size": 16,
         "num_workers": 8
@@ -31,7 +31,7 @@
         "max_time": null
     },
 
-    "weight": "./saved/models/T5.pth",
+    "weight": "./saved/models/T5-v4.pth",
 
     "fit": {
         "ckpt_path": null
