@@ -2,7 +2,7 @@
     "device": "cuda",
     
     "dataset": {
-        "ids": [0],
+        "ids": [2],
         "cache_dir": "../dataset",
         "batch_size": 16,
         "num_workers": 8
