@@ -13,14 +13,14 @@ class T5(Module):
     '''
 
     def __init__(self, 
-                 variant:str="T5-v4",
+                 variant:str="t5-small",
                  max_source_length:int=256, 
                  max_target_length:int=128,
                  optimizer_config:dict={},
                 ):
 
         # Assertions
-        assert variant in ["t5-small", "t5-base", "t5-large","T5-v4"]
+        assert variant in ["t5-small", "t5-base", "t5-large"]
 
         super().__init__()
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     with open("config.json", "r") as f:
         config = json.load(f)
     
-    model = T5().cuda()
+    model = T5('t5-small').cuda()
     print("Model weight", config["weight"])
     model.load_state_dict(torch.load(config["weight"]))
     ############################################################
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         #"And it's truly a great honor to have the opportunity to come to this stage twice; I'm extremely grateful.",
     #]
 
-    inputs = ["Good Morning, How are you?"]
+    inputs = ["translate English to German: Good Morning, How are you?"]
     targets = ["Buongiorno, come stai?"]
 
     logits, loss = model.forward(inputs, targets)
@@ -118,7 +118,8 @@ if __name__ == '__main__':
     print('logits: ', logits)
     print('loss: ', loss)
     
-    outputs = model.predict(inputs)
+    with torch.inference_mode():
+        outputs = model.predict(inputs)
     
     #print('OUTPUT')
     #print(outputs)
