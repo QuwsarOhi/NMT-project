@@ -74,8 +74,10 @@ For more details please refer `requirements.txt`
   ├── trainer/ - training, validation and model optimization
   │   └── trainer.py
   │  
-  └── utils/ - small utility functions
-      ├── util.py
+  │── utils/ - small utility functions
+  │   ├── util.py
+  └── gui/ - gui files
+  │   ├── grad_io.ipynb
   ```
 
 ## Usage
