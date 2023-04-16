@@ -110,21 +110,13 @@ if __name__ == '__main__':
         #"And it's truly a great honor to have the opportunity to come to this stage twice; I'm extremely grateful.",
     #]
 
-    inputs = ["translate English to German: Good Morning, How are you?"]
-    targets = ["Buongiorno, come stai?"]
-
-    logits, loss = model.forward(inputs, targets)
-    print('Model forward')
-    print('logits: ', logits)
-    print('loss: ', loss)
+    inputs = ["translate Italian to French: There are 7 continents on planet earth. Australia is the largest continent and a country by itself."]
     
     with torch.inference_mode():
         outputs = model.predict(inputs)
     
-    #print('OUTPUT')
-    #print(outputs)
-    for (inp, out), tar in zip(zip(inputs, outputs), targets):
-        print(f"\nInput: \n{inp}\n\nOutput: \n{out}\n\nTarget: \n{tar}\n\n")
+    print("\nINPUT\n",inputs[0])
+    print("\nOUTPUT\n",outputs[0])
 
 
 

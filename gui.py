@@ -10,9 +10,7 @@ from model.T5 import T5
 
 # this model was loaded from https://hf.co/models
 model = T5('t5-small').to('cuda')
-#tokenizer = AutoTokenizer.from_pretrained("t5-small")
-#device = 0 if torch.cuda.is_available() else -1
-LANGS = ["English", "Italian", "German", "French"]
+LANGS = ["English", "German", "Italian", "Dutch", "Romanian", "French"]
 
 # Load the weights
 with open("config.json", "r") as f:
@@ -24,10 +22,6 @@ def translate(text, src_lang, tgt_lang):
     """
     Translate the text from source lang to target lang
     """
-    #translation_pipeline = pipeline("translation", model=model, tokenizer=tokenizer, src_lang=src_lang, tgt_lang=tgt_lang, max_length=400, device=device)
-    #translation_pipeline = pipeline("translation", model=model, src_lang=src_lang, tgt_lang=tgt_lang, max_length=400, device=device)
-    #result = translation_pipeline(text)
-    #return result[0]['translation_text']
 
     inputs = ["translate "+src_lang+" to "+tgt_lang+": "+text]
     
