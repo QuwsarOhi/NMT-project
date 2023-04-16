@@ -34,32 +34,28 @@ For more details please refer `requirements.txt`
 ## Folder Structure
   ```
   NMT-project/
-  ├── README.md - Details of the complete project structure
+  ├── README.md         - details of the complete project structure
   │
-  ├── train.py - main script to start training
+  ├── train.py          - main script to start training
   │
-  ├── test.py - evaluation of trained model
+  ├── test.py           - evaluation of trained model
   │
-  ├── gui.py - inference of the model using GUI
+  ├── gui.py            - inference of the model using GUI
   │
-  ├── config.json - holds configuration for training
+  ├── config.json       - holds configuration for training
   │
-  ├── dataloader/ - data pre-processing and data loading
+  ├── dataloader/       - data pre-processing and data loading
   │   └── dataloader.py
   │
-  ├── data/ - default directory for storing input data
+  ├── data/             - default directory for storing input data
   │
-  ├── model/ - models, losses, and metrics
+  ├── model/            - models, losses, and metrics
   │   └── model.py
   │
-  ├── saved/
-  │   ├── models/ - trained models are saved here
-  │   └── logs/ - default logdir for tensorboard and logging output
-  │
-  ├── trainer/ - training, validation and model optimization
+  ├── trainer/          - training, validation and model optimization
   │   └── trainer.py
   │  
-  └── utils/ - small utility functions for printing model parameters
+  └── utils/            - small utility functions for printing model parameters
       └── util.py
   
   ```
