@@ -9,8 +9,6 @@ A use of machine translation, an NLP technique, for language translation for eff
 		* [Config file format](#config-file-format)
 		* [Using config files](#using-config-files)
 		* [Resuming from checkpoints](#resuming-from-checkpoints)
-    * [Using Multiple GPU](#using-multiple-gpu)
-	* [Contribution](#contribution)
 	* [License](#license)
 	* [Acknowledgements](#acknowledgements)
 
