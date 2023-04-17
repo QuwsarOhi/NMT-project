@@ -19,6 +19,7 @@ A use of machine translation, an NLP technique, for language translation for eff
 * PyTorch >= 2.0 or above
 * PytorchLightning >= 2.0 or above
 * Gradio
+
 For more details please refer `requirements.txt`
 
 ## Features
