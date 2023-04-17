@@ -47,7 +47,7 @@ For more details please refer `requirements.txt`
   ├── dataloader/       - data pre-processing and data loading
   │   └── dataloader.py
   │
-  ├── data/             - default directory for storing input data
+  ├── data/             - default directory for storing input data (will be created during training)
   │
   ├── model/            - models, losses, and metrics
   │   │── T5.py
