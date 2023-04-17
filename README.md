@@ -119,19 +119,19 @@ Add addional configurations if you need.
 Modify the configurations in `.json` config files, then run:
 
   ```
-  python train.py --config config.json
+  python train.py
   ```
 
 ### Resuming from checkpoints
-You can resume from a previously saved checkpoint by adding the path of the `*.ckpt` file to the `ckpt_path` parameter. The `*.ckpt` file will be generated at the `default_root_dir` while training.
+You can resume from a previously saved checkpoint by adding the path of the `*.ckpt` file to the `ckpt_path` parameter in `config.json`. The `*.ckpt` file will be generated at the `default_root_dir` while training.
 
 
 ### Checkpoints and Weights
-The last training checkpoint can be found in this link: [T5.ckpt](#)
-The best weight of the model can be found in this link: [T5.pth](#)
+The last training checkpoint can be found in this link: [T5.ckpt](https://mega.nz/file/kjAEyIbY#wAT7NfvlumvXqphdBNarvd_5mX69_jQx_AJIA0FVD9o)
+The best weight of the model can be found in this link: [T5.pth](https://mega.nz/file/tqRx0B7R#_ewI4E8ZGm-MYxHGdy0eED6ACczkgGgLiDt4xbFGGnE)
 
 ### Inference
-To check the output of the model, first download the [T5.pth](#) model weights inside the directory configured in the config file under 'weight'. And then run the `gui.py`.
+To check the output of the model, first download the [T5.pth](https://mega.nz/file/tqRx0B7R#_ewI4E8ZGm-MYxHGdy0eED6ACczkgGgLiDt4xbFGGnE) model weights inside the directory configured in the config file under 'weight'. And then run the `gui.py`.
 
 ## License
 This project is licensed under the MIT License. See  LICENSE for more details
