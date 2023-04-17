@@ -50,7 +50,8 @@ For more details please refer `requirements.txt`
   ├── data/             - default directory for storing input data
   │
   ├── model/            - models, losses, and metrics
-  │   └── model.py
+  │   │── T5.py
+  │   └── T5_sanity.py	- sanity test the trained model
   │
   ├── trainer/          - training, validation and model optimization
   │   └── trainer.py
