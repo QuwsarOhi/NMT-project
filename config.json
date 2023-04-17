@@ -31,7 +31,7 @@
         "max_time": null
     },
 
-    "weight": "./saved/models/T5-v4.pth",
+    "weight": "./T5.pth",
 
     "fit": {
         "ckpt_path": null
