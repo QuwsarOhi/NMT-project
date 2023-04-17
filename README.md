@@ -34,17 +34,19 @@ For more details please refer `requirements.txt`
 ## Folder Structure
   ```
   NMT-project/
-  ├── README.md         - details of the complete project structure
+  ├── README.md             - details of the complete project structure
   │
-  ├── train.py          - main script to start training
+  ├── train.py              - main script to start training
   │
-  ├── test.py           - evaluation of trained model
+  ├── test.py               - evaluation of trained model
   │
-  ├── gui.py            - inference of the model using GUI
+  ├── gui.py                - inference of the model using GUI
   │
-  ├── config.json       - holds configuration for training
+  ├── requirements.txt      - python package requirements
   │
-  ├── dataloader/       - data pre-processing and data loading
+  ├── config.json           - holds configuration for training
+  │
+  ├── dataloader/           - data pre-processing and data loading
   │   └── dataloader.py
   │
   ├── data/             - default directory for storing input data (will be created during training)
@@ -56,7 +58,7 @@ For more details please refer `requirements.txt`
   ├── trainer/          - training, validation and model optimization
   │   └── trainer.py
   │  
-  └── utils/            - small utility functions for printing model parameters
+  └── utils/                - small utility functions for printing model parameters
       └── util.py
   
   ```
