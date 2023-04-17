@@ -34,6 +34,7 @@ For more details please refer `requirements.txt`
 ## Folder Structure
   ```
   NMT-project/
+  │
   ├── README.md             - details of the complete project structure
   │
   ├── train.py              - main script to start training
@@ -49,14 +50,16 @@ For more details please refer `requirements.txt`
   ├── dataloader/           - data pre-processing and data loading
   │   └── dataloader.py
   │
-  ├── data/             - default directory for storing input data (will be created during training)
+  ├── data/                 - default directory for storing input data (will be created during training)
   │
-  ├── model/            - models, losses, and metrics
-  │   │── T5.py	      - actual T5 model
-  │   └── T5_sanity.py  - sanity test the trained model
+  ├── model/                - models, losses, and metrics
+  │   │── T5.py	            - actual T5 model
+  │   └── T5_sanity.py      - sanity test the trained model
   │
-  ├── trainer/          - training, validation and model optimization
+  ├── trainer/              - training, validation and model optimization
   │   └── trainer.py
+  │
+  ├── slides/               - contains project slides and result sheet
   │  
   └── utils/                - small utility functions for printing model parameters
       └── util.py
@@ -66,8 +69,8 @@ For more details please refer `requirements.txt`
 ## Usage
 The code in this repository is an implementation of using T5 model for language translation using the techniques of Natural Language Processing in a Deep Learning Network.
 
-Try `python train.py -c config.json` to train.
-Try `python test.py -c config.json` to test.
+Try `python train.py` to train.
+Try `python test.py` to test.
 
 ### Config file format
 Config files are in `.json` format:
