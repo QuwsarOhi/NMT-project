@@ -51,7 +51,7 @@ For more details please refer `requirements.txt`
   │
   ├── model/            - models, losses, and metrics
   │   │── T5.py
-  │   └── T5_sanity.py - sanity test the trained model
+  │   └── T5_sanity.py  - sanity test the trained model
   │
   ├── trainer/          - training, validation and model optimization
   │   └── trainer.py
