@@ -108,7 +108,7 @@ Config files are in `.json` format:
         "max_time": null                // any time-limit set to train the model
     },
 
-    "weight": "./saved/models/T5-v4.pth",   // final T5 model weight used for inference
+    "weight": "T5.pth",                 // final T5 model weight used for inference
 
     "fit": {
         "ckpt_path": null               // path to the last checkpoint file (*.ckpt) used to resume training
