@@ -129,7 +129,7 @@ The last training checkpoint can be found in this link: [T5.ckpt](#)
 The best weight of the model can be found in this link: [T5.pth](#)
 
 ### Inference
-To check the output of the model, first download the [T5.pth](#) model weights inside this directory. Then run the `gui.py`.
+To check the output of the model, first download the [T5.pth](#) model weights inside the directory configured in the config file under 'weight'. And then run the `gui.py`.
 
 ## License
 This project is licensed under the MIT License. See  LICENSE for more details
